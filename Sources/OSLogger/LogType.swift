@@ -8,7 +8,7 @@
 
 import Foundation
 
-enum LogType {
+public enum LogType {
     case info
     case fault
     case error

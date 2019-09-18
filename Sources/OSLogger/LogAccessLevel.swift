@@ -8,7 +8,7 @@
 
 import Foundation
 
-enum LogAccessLevel: String {
+public enum LogAccessLevel: String {
     case `public`
     case `private`
 }
