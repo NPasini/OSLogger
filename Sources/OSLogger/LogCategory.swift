@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum LogCategory: String {
+internal enum LogCategory: String {
     case ui
     case network
     case dataFlow
