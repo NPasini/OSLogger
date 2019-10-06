@@ -9,7 +9,9 @@ import Foundation
 
 internal enum LogCategory: String {
     case ui
+    case error
     case network
     case dataFlow
+    case database
     case dependencyInjection
 }

@@ -71,12 +71,20 @@ extension OSLogger {
         log(category: .ui, message: message, access: access, type: type, fileName: fileName, functionName: functionName, lineNumber: lineNumber)
     }
     
+    public static func errorLog(message: String, access: LogAccessLevel = LogAccessLevel.private, type: LogType = .debug.self, fileName: String = #file, functionName: String = #function, lineNumber: Int = #line) {
+        log(category: .error, message: message, access: access, type: type, fileName: fileName, functionName: functionName, lineNumber: lineNumber)
+    }
+    
     public static func networkLog(message: String, access: LogAccessLevel = LogAccessLevel.private, type: LogType = .debug.self, fileName: String = #file, functionName: String = #function, lineNumber: Int = #line) {
         log(category: .network, message: message, access: access, type: type, fileName: fileName, functionName: functionName, lineNumber: lineNumber)
     }
     
     public static func dataFlowLog(message: String, access: LogAccessLevel = LogAccessLevel.private, type: LogType = .debug.self, fileName: String = #file, functionName: String = #function, lineNumber: Int = #line) {
         log(category: .dataFlow, message: message, access: access, type: type, fileName: fileName, functionName: functionName, lineNumber: lineNumber)
+    }
+    
+    public static func databaseLog(message: String, access: LogAccessLevel = LogAccessLevel.private, type: LogType = .debug.self, fileName: String = #file, functionName: String = #function, lineNumber: Int = #line) {
+        log(category: .database, message: message, access: access, type: type, fileName: fileName, functionName: functionName, lineNumber: lineNumber)
     }
     
     public static func dependencyInjectionLog(message: String, access: LogAccessLevel = LogAccessLevel.private, type: LogType = .debug.self, fileName: String = #file, functionName: String = #function, lineNumber: Int = #line) {
