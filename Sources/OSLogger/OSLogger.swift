@@ -26,6 +26,12 @@ public class OSLogger {
     }
     
     private static func createOSLog(category: LogCategory) -> OSLog {
+        lock()
+        
+        defer{
+            unlock()
+        }
+        
         if let categoryLog = categorizedLogObjects[category] {
             return categoryLog
         } else {
@@ -63,6 +69,14 @@ public class OSLogger {
         case .private:
             os_log("[thread: %{private}@] [%{private}@:%{private}@ %{private}@] > %{private}@", log: createOSLog(category: category), type: osType, getCurrentThread(), file, line, functionName, message)
         }
+    }
+    
+    private static func lock() {
+        objc_sync_enter(categorizedLogObjects)
+    }
+    
+    private static func unlock() {
+        objc_sync_exit(categorizedLogObjects)
     }
 }
 
