@@ -32,7 +32,7 @@ public class OSLogger {
             unlock()
         }
         
-        if categorizedLogObjects[category] != nil, let log = categorizedLogObjects[category] {
+        if let log = categorizedLogObjects[category] {
             return log
         } else {
             let log = OSLog(subsystem: Bundle.main.bundleIdentifier ?? "Logger", category: category.rawValue)
