@@ -13,16 +13,10 @@ let package = Package(
             name: "OSLogger",
             targets: ["OSLogger"]),
     ],
-    dependencies: [
-        .package(url: "https://github.com/Quick/Quick.git", .upToNextMajor(from: "2.0.0")),
-        .package(url: "https://github.com/Quick/Nimble.git", .upToNextMajor(from: "8.0.1")),
-    ],
+    dependencies: [],
     targets: [
         .target(
             name: "OSLogger",
             dependencies: []),
-        .testTarget(
-            name: "OSLoggerTests",
-            dependencies: ["OSLogger", "Quick", "Nimble"]),
     ]
 )
