@@ -9,7 +9,9 @@ import os.log
 import Foundation
 
 public class OSLogger {
+
     private static var categorizedLogObjects: [LogCategory: OSLog] = [:]
+    private static let logSemaphore: DispatchSemaphore = DispatchSemaphore(value: 1)
     
     private static func getCurrentThread() -> String {
         if Thread.isMainThread {
@@ -26,10 +28,10 @@ public class OSLogger {
     }
     
     private static func createOSLog(category: LogCategory) -> OSLog {
-        lock()
+        logSemaphore.wait()
         
         defer{
-            unlock()
+            logSemaphore.signal()
         }
         
         if let log = categorizedLogObjects[category] {
@@ -70,14 +72,6 @@ public class OSLogger {
             os_log("[thread: %{private}@] [%{private}@:%{private}@ %{private}@] > %{private}@", log: createOSLog(category: category), type: osType, getCurrentThread(), file, line, functionName, message)
         }
     }
-    
-    private static func lock() {
-        objc_sync_enter(categorizedLogObjects)
-    }
-    
-    private static func unlock() {
-        objc_sync_exit(categorizedLogObjects)
-    }
 }
 
 extension OSLogger {
@@ -96,7 +90,7 @@ extension OSLogger {
     public static func dataFlowLog(message: String, access: LogAccessLevel = LogAccessLevel.private, type: LogType = .debug.self, fileName: String = #file, functionName: String = #function, lineNumber: Int = #line) {
         log(category: .dataFlow, message: message, access: access, type: type, fileName: fileName, functionName: functionName, lineNumber: lineNumber)
     }
-    
+
     public static func databaseLog(message: String, access: LogAccessLevel = LogAccessLevel.private, type: LogType = .debug.self, fileName: String = #file, functionName: String = #function, lineNumber: Int = #line) {
         log(category: .database, message: message, access: access, type: type, fileName: fileName, functionName: functionName, lineNumber: lineNumber)
     }
