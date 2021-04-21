@@ -11,4 +11,3 @@ public enum LogAccessLevel: String {
     case `public`
     case `private`
 }
-
