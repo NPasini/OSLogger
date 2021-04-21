@@ -13,14 +13,10 @@ let package = Package(
             name: "OSLogger",
             targets: ["OSLogger"]),
     ],
-    dependencies: [
-    ],
+    dependencies: [],
     targets: [
         .target(
             name: "OSLogger",
             dependencies: []),
-        .testTarget(
-            name: "OSLoggerTests",
-            dependencies: ["OSLogger"]),
     ]
 )

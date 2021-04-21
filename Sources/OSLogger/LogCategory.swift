@@ -7,7 +7,7 @@
 
 import Foundation
 
-internal enum LogCategory: String {
+public enum LogCategory: String {
     case ui
     case error
     case network

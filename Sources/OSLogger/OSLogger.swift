@@ -8,10 +8,17 @@
 import os.log
 import Foundation
 
-public class OSLogger {
-    private static var categorizedLogObjects: [LogCategory: OSLog] = [:]
-    
-    private static func getCurrentThread() -> String {
+public class Logger: LoggingService {
+
+    private let logQueue: DispatchQueue
+    private var categorizedLogObjects: [String: OSLog]
+
+    init() {
+        categorizedLogObjects = [:]
+        logQueue = DispatchQueue(label: "logger.queue", qos: .utility)
+    }
+
+    private func getCurrentThread() -> String {
         if Thread.isMainThread {
             return "main"
         } else {
@@ -24,84 +31,35 @@ public class OSLogger {
             }
         }
     }
-    
-    private static func createOSLog(category: LogCategory) -> OSLog {
-        lock()
-        
-        defer{
-            unlock()
-        }
-        
-        if let log = categorizedLogObjects[category] {
-            return log
-        } else {
-            let log = OSLog(subsystem: Bundle.main.bundleIdentifier ?? "Logger", category: category.rawValue)
-            categorizedLogObjects[category] = log
-            return log
+
+    private func createOSLog(category: String) -> OSLog {
+        logQueue.sync {
+            if let log = categorizedLogObjects[category] {
+                return log
+            } else {
+                let log = OSLog(subsystem: Bundle.main.bundleIdentifier ?? "Logger", category: category)
+                categorizedLogObjects[category] = log
+                return log
+            }
         }
     }
-    
-    private static func getOSLogType(type: LogType) -> OSLogType {
-        switch type {
-        case .info:
-            return OSLogType.info
-        case .fault:
-            return OSLogType.fault
-        case .error:
-            return OSLogType.error
-        case .debug:
-            return OSLogType.debug
-        case .default:
-            return OSLogType.default
-        }
-    }
-    
-    private static func log(category: LogCategory, message: String, access: LogAccessLevel = LogAccessLevel.private, type: LogType = .debug, fileName: String = #file, functionName: String = #function, lineNumber: Int = #line) {
-        
-        let file = (fileName as NSString).lastPathComponent
+
+    public func log(category: String, message: String, access: LogAccessLevel, type: LogType, fileName: String, functionName: String, lineNumber: Int) {
+
+        var logMessage: StaticString
         let line = String(lineNumber)
-        
-        let osType = getOSLogType(type: type)
-        
+        let osType = type.getOSLogType()
+        let currentThread = getCurrentThread()
+        let logCategory = createOSLog(category: category)
+        let file = (fileName as NSString).lastPathComponent
+
         switch access {
         case .public:
-            os_log("[thread: %{public}@] [%{public}@:%{public}@ %{public}@] > %{public}@", log: createOSLog(category: category), type: osType, getCurrentThread(), file, line, functionName, message)
+            logMessage = "[thread: %{public}@] [%{public}@:%{public}@ %{public}@] > %{public}@"
         case .private:
-            os_log("[thread: %{private}@] [%{private}@:%{private}@ %{private}@] > %{private}@", log: createOSLog(category: category), type: osType, getCurrentThread(), file, line, functionName, message)
+            logMessage = "[thread: %{private}@] [%{private}@:%{private}@ %{private}@] > %{private}@"
         }
-    }
-    
-    private static func lock() {
-        objc_sync_enter(categorizedLogObjects)
-    }
-    
-    private static func unlock() {
-        objc_sync_exit(categorizedLogObjects)
-    }
-}
 
-extension OSLogger {
-    public static func uiLog(message: String, access: LogAccessLevel = LogAccessLevel.private, type: LogType = .debug.self, fileName: String = #file, functionName: String = #function, lineNumber: Int = #line) {
-        log(category: .ui, message: message, access: access, type: type, fileName: fileName, functionName: functionName, lineNumber: lineNumber)
-    }
-    
-    public static func errorLog(message: String, access: LogAccessLevel = LogAccessLevel.private, type: LogType = .debug.self, fileName: String = #file, functionName: String = #function, lineNumber: Int = #line) {
-        log(category: .error, message: message, access: access, type: type, fileName: fileName, functionName: functionName, lineNumber: lineNumber)
-    }
-    
-    public static func networkLog(message: String, access: LogAccessLevel = LogAccessLevel.private, type: LogType = .debug.self, fileName: String = #file, functionName: String = #function, lineNumber: Int = #line) {
-        log(category: .network, message: message, access: access, type: type, fileName: fileName, functionName: functionName, lineNumber: lineNumber)
-    }
-    
-    public static func dataFlowLog(message: String, access: LogAccessLevel = LogAccessLevel.private, type: LogType = .debug.self, fileName: String = #file, functionName: String = #function, lineNumber: Int = #line) {
-        log(category: .dataFlow, message: message, access: access, type: type, fileName: fileName, functionName: functionName, lineNumber: lineNumber)
-    }
-    
-    public static func databaseLog(message: String, access: LogAccessLevel = LogAccessLevel.private, type: LogType = .debug.self, fileName: String = #file, functionName: String = #function, lineNumber: Int = #line) {
-        log(category: .database, message: message, access: access, type: type, fileName: fileName, functionName: functionName, lineNumber: lineNumber)
-    }
-    
-    public static func dependencyInjectionLog(message: String, access: LogAccessLevel = LogAccessLevel.private, type: LogType = .debug.self, fileName: String = #file, functionName: String = #function, lineNumber: Int = #line) {
-        log(category: .dependencyInjection, message: message, access: access, type: type, fileName: fileName, functionName: functionName, lineNumber: lineNumber)
+        os_log(logMessage, log: logCategory, type: osType, currentThread, file, line, functionName, message)
     }
 }
