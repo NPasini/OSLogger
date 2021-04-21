@@ -13,7 +13,7 @@ public class Logger: LoggingService {
     private let logQueue: DispatchQueue
     private var categorizedLogObjects: [String: OSLog]
 
-    init() {
+    public init() {
         categorizedLogObjects = [:]
         logQueue = DispatchQueue(label: "logger.queue", qos: .utility)
     }
